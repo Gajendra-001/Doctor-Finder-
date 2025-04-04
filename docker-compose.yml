@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    expose:
+      - 8000
+    environment:
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=doctor_finder.settings
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - web
+
+  db:
+    image: alpine:latest
+    volumes:
+      - sqlite_data:/app/data
+    command: tail -f /dev/null
+
+volumes:
+  static_volume:
+  media_volume:
+  sqlite_data: 
